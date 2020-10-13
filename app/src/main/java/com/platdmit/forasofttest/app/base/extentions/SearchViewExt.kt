@@ -6,15 +6,16 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
 @ExperimentalCoroutinesApi
-fun SearchView.getQueryHandlerFlow(stringLimit: Int = 0) :StateFlow<String> {
+fun SearchView.getQueryHandlerFlow(stringLimit: Int = 0): StateFlow<String> {
 
     val searchString = MutableStateFlow("")
 
     setOnQueryTextListener(object : SearchView.OnQueryTextListener {
         override fun onQueryTextSubmit(query: String?): Boolean {
             query?.let {
-                if(it.length >= stringLimit){
+                if (it.length >= stringLimit) {
                     searchString.value = it
+                    clearFocus()
                 }
             }
             return true
@@ -22,7 +23,7 @@ fun SearchView.getQueryHandlerFlow(stringLimit: Int = 0) :StateFlow<String> {
 
         override fun onQueryTextChange(newText: String?): Boolean {
             newText?.let {
-                    searchString.value = it
+                searchString.value = it
             }
             return true
         }
