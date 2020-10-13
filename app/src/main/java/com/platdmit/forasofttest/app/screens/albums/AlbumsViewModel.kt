@@ -2,15 +2,15 @@ package com.platdmit.forasofttest.app.screens.albums
 
 import androidx.hilt.Assisted
 import androidx.hilt.lifecycle.ViewModelInject
-import androidx.lifecycle.*
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import com.platdmit.forasofttest.app.base.BaseViewModel
 import com.platdmit.forasofttest.domain.models.Album
 import com.platdmit.forasofttest.domain.repositories.AlbumRepo
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.cancelChildren
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
