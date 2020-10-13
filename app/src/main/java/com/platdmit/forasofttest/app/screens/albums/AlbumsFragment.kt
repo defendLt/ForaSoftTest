@@ -22,8 +22,14 @@ import com.platdmit.forasofttest.app.utilities.enums.SaveStateKeys
 import com.platdmit.forasofttest.databinding.FragmentAlbumsBinding
 import com.platdmit.forasofttest.domain.models.Album
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.launch
 
 @FlowPreview
 @ExperimentalCoroutinesApi
@@ -32,6 +38,7 @@ class AlbumsFragment : Fragment(R.layout.fragment_albums) {
     private val albumsViewModel: AlbumsViewModel by viewModels()
     private val albumsViewBinding: FragmentAlbumsBinding by viewBinding()
     private val albumsAdapter = AlbumsPagingDataAdapter(::recyclerViewClickListener)
+    private var actualSearchQuery: String = ""
     private var pagingDataJob: Job? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -41,6 +48,11 @@ class AlbumsFragment : Fragment(R.layout.fragment_albums) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        //Restore search query
+        savedInstanceState?.getString(SaveStateKeys.QUERY_SAVE_KEY.name)?.let {
+            actualSearchQuery = it
+        }
 
         initRecyclerView()
         initObserves()
@@ -53,7 +65,16 @@ class AlbumsFragment : Fragment(R.layout.fragment_albums) {
 
         //Init custom search listener
         (menu.findItem(R.id.search)?.actionView as? SearchView)?.let {
+            it.setQuery(actualSearchQuery, false)
             initSearchResultHandler(it)
+        }
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        //Save search query
+        if(actualSearchQuery.isNotEmpty()){
+            outState.putString(SaveStateKeys.QUERY_SAVE_KEY.name, actualSearchQuery)
         }
     }
 
@@ -79,6 +100,7 @@ class AlbumsFragment : Fragment(R.layout.fragment_albums) {
                 .distinctUntilChanged()
                 .filter { it.isNotEmpty() }
                 .collect { query ->
+                    actualSearchQuery = query
                     albumsViewModel.findAlbums(query)
                 }
         }
