@@ -66,7 +66,7 @@ class AlbumsFragment : Fragment(R.layout.fragment_albums) {
         //Init custom search listener
         (menu.findItem(R.id.search)?.actionView as? SearchView)?.let {
             it.setQuery(actualSearchQuery, false)
-            initSearchResultHandler(it)
+            initSearchQueryHandler(it)
         }
     }
 
@@ -93,7 +93,7 @@ class AlbumsFragment : Fragment(R.layout.fragment_albums) {
         }
     }
 
-    private fun initSearchResultHandler(searchView: SearchView) {
+    private fun initSearchQueryHandler(searchView: SearchView) {
         lifecycleScope.launch {
             searchView.getQueryHandlerFlow(5)
                 .debounce(1000)
