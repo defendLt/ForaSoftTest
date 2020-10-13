@@ -49,6 +49,7 @@ class AlbumFragment : Fragment(R.layout.fragment_album) {
             albumName.text = album.name
             albumAuthor.text = album.artistName
             albumYear.text = album.releaseDate
+            albumGenre.text = album.primaryGenreName
             albumCover.picassoRender(album.artUrl100)
         }
     }
