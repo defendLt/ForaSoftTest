@@ -29,6 +29,7 @@ out/
 /captures
 .externalNativeBuild
 .cxx
+/.idea
 /.idea/encodings.xml
 /.idea/gradle.xml
 /.idea/jarRepositories.xml
@@ -37,3 +38,4 @@ out/
 /.idea/codeStyles/
 /.idea/runConfigurations.xml
 /.idea/vcs.xml
+/.idea/dbnavigator.xml

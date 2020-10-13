@@ -31,7 +31,7 @@ constructor(
 
                 //Get tracks for active album
                 albumInteractor.getTracks(album)
-                    .catch { exception -> messageLiveData.postValue(exception.localizedMessage) }
+                    .catch { e -> messageLiveData.postValue(e.localizedMessage) }
                     .collect {
                         when (it) {
                             is DataState.Success<List<Track>> -> {

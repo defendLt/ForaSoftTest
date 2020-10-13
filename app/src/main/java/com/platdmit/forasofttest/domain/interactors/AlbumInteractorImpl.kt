@@ -12,6 +12,7 @@ class AlbumInteractorImpl(
 ) : AlbumInteractor {
     override suspend fun getTracks(album: Album): Flow<DataState<List<Track>>> {
         return trackRepo.getTracksForAlbum(album).map { tracks ->
+            //Sort tracks by disk and number
             DataState.Success(tracks.sortedWith(compareBy({ it.disk }, { it.number })))
         }
     }

@@ -1,19 +1,16 @@
 package com.platdmit.forasofttest.data
 
-import androidx.paging.ExperimentalPagingApi
-import androidx.paging.PagingSource
+import androidx.paging.*
 import com.platdmit.forasofttest.data.retrofit.ApiAlbumsRepo
 import com.platdmit.forasofttest.data.retrofit.models.ApiAlbum
 import com.platdmit.forasofttest.data.room.dao.AlbumDao
 import com.platdmit.forasofttest.data.room.entity.DbAlbum
+import com.platdmit.forasofttest.data.utilities.PagingSearchKeys
 import com.platdmit.forasofttest.domain.converters.AlbumConverter
 import com.platdmit.forasofttest.domain.models.Album
 import com.platdmit.forasofttest.domain.repositories.AlbumRepo
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.withContext
 import retrofit2.HttpException
 import java.io.IOException
 
@@ -23,32 +20,35 @@ constructor(
     private val apiAlbumsRepo: ApiAlbumsRepo,
     private val dbAlbumsRepo: AlbumDao,
     private val albumConverter: AlbumConverter<DbAlbum, ApiAlbum, Album>
-) : AlbumRepo, PagingSource<String, Album>() {
-    override suspend fun getAlbum(name: String): Flow<List<Album>> = flow {
-        var dbAlbums = dbAlbumsRepo.getAlbumsForName(name, 0, 0)
-        if (dbAlbums.isEmpty()) {
-            val apiAlbums = apiAlbumsRepo.getAlbums(name, 10, 0)
-            dbAlbums = apiAlbums.map { albumConverter.fromApiToDb(it) }
-            dbAlbumsRepo.insertList(dbAlbums)
-        }
-        emit(dbAlbums.map { albumConverter.fromDbToDomain(it) })
-    }.flowOn(Dispatchers.IO)
+) : AlbumRepo, PagingSource<PagingSearchKeys, Album>() {
 
-    override suspend fun load(params: LoadParams<String>): LoadResult<String, Album> {
+    override suspend fun getPagingSearchResult(name: String): Flow<PagingData<Album>> {
+        return Pager(PagingConfig(
+            pageSize = PAGE_SIZE,
+            prefetchDistance = LOAD_DISTANCE,
+            initialLoadSize = INIT_LOAD_SIZE,
+            enablePlaceholders = PLACEHOLDER
+        ), initialKey = PagingSearchKeys(name)){
+            this
+        }.flow
+    }
+
+    override suspend fun load(params: LoadParams<PagingSearchKeys>): LoadResult<PagingSearchKeys, Album> {
         return try {
-            var nextPage = params.key?.toInt()?:0
+
+            val actualKeys = params.key!!
 
             val dbAlbums = withContext(Dispatchers.IO) {
 
                 //Find albums from bd
-                var dbAlbums = dbAlbumsRepo.getAlbumsForName("Meteora", params.loadSize, nextPage*params.loadSize)
+                var dbAlbums = dbAlbumsRepo.getAlbumsForName(actualKeys.searchString, params.loadSize, actualKeys.pageNum*params.loadSize)
 
                 if(dbAlbums.isEmpty()){
 
-                    val apiAlbums = apiAlbumsRepo.getAlbums("Meteora", params.loadSize, nextPage)
+                    val apiAlbums = apiAlbumsRepo.getAlbums(actualKeys.searchString, params.loadSize, actualKeys.pageNum)
 
                     if (apiAlbums.isEmpty()) {
-                        throw Exception("Empty Result")
+                        throw Exception(EMPTY_RESULT)
                     }
 
                     dbAlbums = apiAlbums.map { albumConverter.fromApiToDb(it) }
@@ -58,19 +58,15 @@ constructor(
                 dbAlbums
             }
 
-            println("albums s: $dbAlbums")
             val albums = dbAlbums.map { albumConverter.fromDbToDomain(it) }.sortedBy { it.name }
-            println("albums sortedBy: $albums")
-            var prevPage = if(nextPage > 0){
-                nextPage.toString()
-            } else ""
 
-            nextPage++
+            val nextKeys = actualKeys.copy(pageNum = actualKeys.pageNum+1)
 
+            //For correct paging work first prevKey == null
             LoadResult.Page(
                 albums,
-                prevPage,
-                "$nextPage"
+                prevKey = if(actualKeys.pageNum == 0) null else actualKeys,
+                nextKeys
             )
 
         } catch (exception: IOException) {
@@ -80,5 +76,13 @@ constructor(
         } catch (exception: Exception){
             return LoadResult.Error(exception)
         }
+    }
+
+    companion object{
+        const val PAGE_SIZE = 20
+        const val LOAD_DISTANCE = 5
+        const val INIT_LOAD_SIZE = 20
+        const val PLACEHOLDER = false
+        const val EMPTY_RESULT = "Empty Result"
     }
 }

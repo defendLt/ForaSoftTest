@@ -37,21 +37,6 @@ object RepositoryModule {
         )
     }
 
-    @ExperimentalPagingApi
-    @Singleton
-    @Provides
-    fun provideAlbumRepoImpl(
-        apiAlbumsRepo: ApiAlbumsRepo,
-        dbAlbumRepo: AlbumDao,
-        albumConverter: AlbumConverterImpl
-    ): AlbumRepoImpl {
-        return AlbumRepoImpl(
-            apiAlbumsRepo,
-            dbAlbumRepo,
-            albumConverter
-        )
-    }
-
     @Singleton
     @Provides
     fun provideTrackRepo(
