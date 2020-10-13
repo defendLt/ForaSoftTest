@@ -2,13 +2,13 @@ package com.platdmit.forasofttest.app
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.view.isVisible
 import androidx.navigation.NavController
 import androidx.navigation.Navigation
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.NavigationUI
 import by.kirich1409.viewbindingdelegate.viewBinding
 import com.platdmit.forasofttest.R
-import com.platdmit.forasofttest.app.base.extentions.setVisibilityStatus
 import com.platdmit.forasofttest.app.utilities.ProgressBarHandler
 import com.platdmit.forasofttest.databinding.ActivityNavHostBinding
 import dagger.hilt.android.AndroidEntryPoint
@@ -42,6 +42,6 @@ class NavHostActivity : AppCompatActivity(R.layout.activity_nav_host), ProgressB
     }
 
     override fun showLoading(status: Boolean) {
-        navHostBinding.progressBar.setVisibilityStatus(status)
+        navHostBinding.progressBar.isVisible = status
     }
 }

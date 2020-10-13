@@ -2,8 +2,8 @@ package com.platdmit.forasofttest.app.screens.album
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
-import com.platdmit.forasofttest.app.base.extentions.setVisibilityStatus
 import com.platdmit.forasofttest.databinding.FragmentTrackItemBinding
 import com.platdmit.forasofttest.domain.models.Track
 
@@ -35,7 +35,7 @@ class TracksAdapter : RecyclerView.Adapter<TracksAdapter.TracksViewHolder>() {
                 trackNumber.text = track.number.toString()
                 trackName.text = track.name
                 trackTime.text = track.timeMillis
-                trackExplicit.setVisibilityStatus(track.explicitness)
+                trackExplicit.isVisible = track.explicitness
             }
         }
     }
