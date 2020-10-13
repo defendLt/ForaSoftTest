@@ -7,4 +7,5 @@
     <color name="colorBaseText">#F3F3F3</color>
     <color name="colorTitleText">#727272</color>
     <color name="colorDescText">#444444</color>
+    <color name="colorExplicitText">#ff4433</color>
 </resources>
