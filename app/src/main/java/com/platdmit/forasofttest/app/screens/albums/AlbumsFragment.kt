@@ -82,6 +82,7 @@ class AlbumsFragment : Fragment(R.layout.fragment_albums) {
         albumsViewBinding.run {
             albumsList.layoutManager = LinearLayoutManager(context)
             albumsList.adapter = albumsAdapter
+            albumsList.setHasFixedSize(true)
         }
     }
 
