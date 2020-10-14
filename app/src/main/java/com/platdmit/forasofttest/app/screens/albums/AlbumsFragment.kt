@@ -9,12 +9,15 @@ import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
-import androidx.navigation.findNavController
+import androidx.navigation.fragment.findNavController
+import androidx.paging.CombinedLoadStates
+import androidx.paging.LoadState
 import androidx.paging.PagingData
 import androidx.recyclerview.widget.LinearLayoutManager
 import by.kirich1409.viewbindingdelegate.viewBinding
 import com.platdmit.forasofttest.R
 import com.platdmit.forasofttest.app.base.extentions.getQueryHandlerFlow
+import com.platdmit.forasofttest.app.base.extentions.showActionResultMessage
 import com.platdmit.forasofttest.app.base.extentions.showLoading
 import com.platdmit.forasofttest.app.base.extentions.showResultMessage
 import com.platdmit.forasofttest.app.utilities.enums.BundleTypes
@@ -30,6 +33,8 @@ import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
+import retrofit2.HttpException
+import java.io.IOException
 
 @FlowPreview
 @ExperimentalCoroutinesApi
@@ -79,9 +84,11 @@ class AlbumsFragment : Fragment(R.layout.fragment_albums) {
     }
 
     private fun initRecyclerView() {
+        albumsAdapter.addLoadStateListener(::adapterLoadStateListener)
+
         albumsViewBinding.run {
             albumsList.layoutManager = LinearLayoutManager(context)
-            albumsList.adapter = albumsAdapter
+            albumsList.adapter = albumsAdapter.withLoadStateFooter(AlbumsLoadStateAdapter())
             albumsList.setHasFixedSize(true)
         }
     }
@@ -107,6 +114,21 @@ class AlbumsFragment : Fragment(R.layout.fragment_albums) {
         }
     }
 
+    private fun adapterLoadStateListener(loadStates: CombinedLoadStates){
+        val loadState = loadStates.refresh
+        if(loadState is LoadState.Error){
+            when(loadState.error){
+                is IOException,
+                is HttpException -> {
+                    loadState.error.localizedMessage?.let {
+                        showActionResultMessage(it) { albumsAdapter.retry() }
+                    }
+                }
+                else -> loadState.error.localizedMessage?.let (::showResultMessage)
+            }
+        }
+    }
+
     private fun initSearchResult(pagingData: PagingData<Album>){
         pagingDataJob?.cancel()
         pagingDataJob = lifecycleScope.launch {
@@ -116,7 +138,7 @@ class AlbumsFragment : Fragment(R.layout.fragment_albums) {
     }
 
     private fun recyclerViewClickListener(album: Album){
-        view?.findNavController()?.navigate(
+        findNavController().navigate(
             R.id.action_albumsFragment_to_albumFragment, bundleOf(
                 BundleTypes.ALBUM_DETAIL.name to album
             )

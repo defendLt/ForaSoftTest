@@ -1,6 +1,10 @@
 <resources>
     <string name="app_name">ForaSoftTest</string>
-    <string name="fragment_albums_title">Альбомы</string>
-    <string name="search_album">Поиск альбома</string>
+    <string name="fragment_albums_title">Albums</string>
+    <string name="search_album">Album search</string>
     <string name="retry_button">Retry</string>
+    <string name="notice_input_search_query">Enter your search term</string>
+    <string name="notice_empty_results">No results</string>
+    <string name="notice_error_connect">Check your internet connection</string>
+    <string name="notice_error_response">Server response error</string>
 </resources>
