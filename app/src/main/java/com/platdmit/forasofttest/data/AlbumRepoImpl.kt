@@ -83,6 +83,6 @@ constructor(
         const val LOAD_DISTANCE = 5
         const val INIT_LOAD_SIZE = 20
         const val PLACEHOLDER = false
-        const val EMPTY_RESULT = "Empty Result"
+        const val EMPTY_RESULT = "Empty search result"
     }
 }
