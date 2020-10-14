@@ -27,7 +27,9 @@ fun SearchView.getQueryHandlerFlow(stringLimit: Int = 0): StateFlow<String> {
 
         override fun onQueryTextChange(newText: String?): Boolean {
             newText?.let {
-                searchString.value = it
+                if (it.length >= stringLimit) {
+                    searchString.value = it
+                }
             }
             return true
         }

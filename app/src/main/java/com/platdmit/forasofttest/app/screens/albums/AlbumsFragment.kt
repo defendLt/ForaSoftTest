@@ -103,13 +103,15 @@ class AlbumsFragment : Fragment(R.layout.fragment_albums) {
 
     private fun initSearchQueryHandler(searchView: SearchView) {
         lifecycleScope.launch {
-            searchView.getQueryHandlerFlow(5)
+            searchView.getQueryHandlerFlow()
                 .debounce(1000)
                 .distinctUntilChanged()
                 .filter { it.isNotEmpty() }
                 .collect { query ->
                     actualSearchQuery = query
-                    albumsViewModel.findAlbums(query)
+                    if (query.length > 2) {
+                        albumsViewModel.findAlbums(query)
+                    }
                 }
         }
     }
